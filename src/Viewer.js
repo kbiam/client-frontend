@@ -49,14 +49,16 @@ const Viewer = () => {
     }
   };
 
-  const handleTrackEvent = (e) => {
+  const handleTrackEvent = async (e) => {
     const video = document.getElementById("video");
-    video.srcObject = e.streams[0];
+    console.log("setiing video",e.streams[0])
+    video.srcObject = await e.streams[0];
   };
 
   const handleICECandidateEvent = async (event) => {
     if (event.candidate) {
       try {
+        console.log("sending post req")
         await axios.post(`${serverUrl}/ice-candidate`, {
           candidate: event.candidate,
           role: 'consumer'

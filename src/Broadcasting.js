@@ -9,7 +9,7 @@ const Broadcasting = () => {
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const streamRef = useRef(null);
-  const peerRef = useRef(null);
+  const peerRef = useRef();
 
   const startStreamingAndRecording = async () => {
     try {
@@ -122,9 +122,10 @@ const Broadcasting = () => {
         <video id="video" autoPlay muted></video>
       </div>
       <div className="controls">
-        {!isStreaming ? (
+        {!isStreaming && (
           <button onClick={startStreamingAndRecording}>Start Streaming</button>
-        ) : (
+        )}
+        {isStreaming && (
           <button onClick={stopStreamingAndDownload}>Stop Streaming</button>
         )}
       </div>
