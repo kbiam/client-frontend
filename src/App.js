@@ -6,6 +6,7 @@ import {Route, Routes} from "react-router-dom"
 import Header from './Header';
 // import EventViewerPage from './EventViewerPage';
 import Modal from "react-modal";
+import StartStream from './StartStream';
 
 function App() {
   Modal.setAppElement("#root");
@@ -14,7 +15,8 @@ function App() {
       <Header />
       <Routes>
         <Route path='/' element = {<EventPage />}/>
-        <Route path='/view-stream' element = {<EventPage />}/>
+        <Route path='/view-stream/:streamId' element = {<EventPage />}/>
+        <Route path='/start-stream' element = {<StartStream />}/>
       </Routes>
     </div>
   );

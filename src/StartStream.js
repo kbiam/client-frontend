@@ -5,11 +5,9 @@ import EventPhotos from './EventPhotos';
 import Functionallity from './Functionallity';
 import Broadcasting from './Broadcasting';
 import Viewer from './Viewer';
-import { useLocation, useParams } from 'react-router-dom';
-const EventPage = () => {
+import { useLocation } from 'react-router-dom';
+const StartStream = () => {
   const location = useLocation()
-  const {streamId} = useParams();
-  // console.log(streamId)
 
   return (
     <div className="event-page">
@@ -45,8 +43,8 @@ const EventPage = () => {
               </div>
               <h1 className="event-title">Functionallity</h1>
               {/* <Functionallity /> */}
-              {/* <Broadcasting /> */}
-              <Viewer streamerId={streamId} />
+              <Broadcasting />
+              {/* <Viewer /> */}
               <h2 className="section-title">Event Photos</h2>
               <EventPhotos />
               <h2 className="section-title">Social Media Posts</h2>
@@ -62,4 +60,4 @@ const EventPage = () => {
   );
 };
 
-export default EventPage;
+export default StartStream;

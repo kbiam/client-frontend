@@ -1,17 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { serverUrl } from './helper/Helper';
 
-const Viewer = () => {
-  const location = useLocation();
+const Viewer = ({streamerId}) => {
+  console.log(streamerId)
   const peerRef = useRef();
 
   useEffect(() => {
-    if (location.pathname === "/view-stream") {
+    if (streamerId) {
       watchStream();
     }
-  }, [location.pathname]);
+  }, [streamerId]);
 
   const watchStream = () => {
     try {
@@ -26,7 +26,7 @@ const Viewer = () => {
 
   const createPeer = () => {
     const peer = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.stunprotocol.org" }],
+      iceServers: [{ urls: "stun:stunprotocol.org" }],
     });
 
     peer.onicecandidate = handleICECandidateEvent;
@@ -41,7 +41,8 @@ const Viewer = () => {
       const offer = await peer.createOffer();
       await peer.setLocalDescription(offer);
       const payload = { sdp: peer.localDescription };
-      const { data } = await axios.post(`${serverUrl}/consumer`, payload);
+      console.log(payload.sdp,"sending")
+      const { data } = await axios.post(`${serverUrl}/consumer/${streamerId}`, payload.sdp);
       const desc = new RTCSessionDescription(data.sdp);
       await peer.setRemoteDescription(desc);
     } catch (error) {
@@ -51,15 +52,13 @@ const Viewer = () => {
 
   const handleTrackEvent = async (e) => {
     const video = document.getElementById("video");
-    console.log("setiing video",e.streams[0])
-    video.srcObject = await e.streams[0];
+    video.srcObject = e.streams[0];
   };
 
   const handleICECandidateEvent = async (event) => {
     if (event.candidate) {
       try {
-        console.log("sending post req")
-        await axios.post(`${serverUrl}/ice-candidate`, {
+        await axios.post(`${serverUrl}/ice-candidate/${streamerId}`, {
           candidate: event.candidate,
           role: 'consumer'
         });

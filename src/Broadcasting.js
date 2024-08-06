@@ -10,6 +10,7 @@ const Broadcasting = () => {
   const chunksRef = useRef([]);
   const streamRef = useRef(null);
   const peerRef = useRef();
+  const [streamerId, setStreamerId] = useState(null);
 
   const startStreamingAndRecording = async () => {
     try {
@@ -34,8 +35,13 @@ const Broadcasting = () => {
       stream.getTracks().forEach((track) => peer.addTrack(track, stream));
       videoElement.srcObject = stream;
 
-      const streamLink = `${serverUrl}/view-stream`;
-      setStreamUrl(streamLink);
+      const response = await axios.post(`${serverUrl}/generate-stream-id`);
+      console.log(response,"res")
+      
+      setStreamerId(response.data.streamerId);
+
+      const streamLink = `localhost:3000/view-stream/${streamerId}`;
+      // setStreamUrl(streamLink);
       setIsStreaming(true);
 
       const mediaRecorder = new MediaRecorder(stream, {
@@ -92,12 +98,26 @@ const Broadcasting = () => {
 
   const handleNegotiationNeededEvent = async (peer) => {
     try {
+      let localStreamerId = streamerId;
+
+      if(localStreamerId===null){
+        const response = await axios.post(`${serverUrl}/generate-stream-id`);
+        console.log(response,"resinh") 
+        localStreamerId = response.data.streamerId
+        setStreamerId(localStreamerId);
+        setStreamUrl(`localhost:3000/view-stream/${localStreamerId}`)
+      }
       const offer = await peer.createOffer();
       await peer.setLocalDescription(offer);
       const payload = { sdp: peer.localDescription };
-      const { data } = await axios.post(`${serverUrl}/broadcast`, payload);
-      const desc = new RTCSessionDescription(data.sdp);
-      await peer.setRemoteDescription(desc);
+      console.log(localStreamerId,"streamerId")
+
+      if(localStreamerId){
+        const { data } = await axios.post(`${serverUrl}/broadcast/${localStreamerId}`, payload);
+        const desc = new RTCSessionDescription(data.sdp);
+        await peer.setRemoteDescription(desc);
+      }
+
     } catch (error) {
       console.error("Error handling negotiation:", error);
     }
@@ -106,7 +126,7 @@ const Broadcasting = () => {
   const handleICECandidateEvent = async (event) => {
     if (event.candidate) {
       try {
-        await axios.post(`${serverUrl}/ice-candidate`, {
+        await axios.post(`${serverUrl}/ice-candidate/${streamerId}`, {
           candidate: event.candidate,
           role: 'broadcaster'
         });
